@@ -11,133 +11,111 @@ local Window = Fluent:CreateWindow({
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
     Acrylic = true,
-    Theme = "Dark", -- MÀU GỐC CỦA FLUENT
+    Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- KHỞI TẠO TOÀN BỘ TAB (FULL)
+-- TẠO CÁC TAB CHÍNH
 local Tabs = {
-    Webhook = Window:AddTab({ Title = "Report & Ideas", Icon = "message-circle" }),
-    Shop = Window:AddTab({ Title = "Shop / Misc", Icon = "shopping-cart" }),
-    StatSer = Window:AddTab({ Title = "Status & Server", Icon = "server" }),
-    LocalPlayer = Window:AddTab({ Title = "Local Player", Icon = "user" }),
-    Settings = Window:AddTab({ Title = "Setting Farm", Icon = "settings" }),
-    Skills = Window:AddTab({ Title = "Select Skill", Icon = "crosshair" }),
     Farming = Window:AddTab({ Title = "Main Farming", Icon = "swords" }),
-    Stack = Window:AddTab({ Title = "Stack Farming", Icon = "layers" }),
-    Other = Window:AddTab({ Title = "Other Farming", Icon = "box" }),
-    AdminFake = Window:AddTab({ Title = "Admin & Fake", Icon = "shield-alert" })
+    Stack = Window:AddTab({ Title = "Stack Farm", Icon = "layers" }),
+    Other = Window:AddTab({ Title = "Other Farm", Icon = "box" }),
+    Skills = Window:AddTab({ Title = "Skills", Icon = "crosshair" }),
+    Local = Window:AddTab({ Title = "Local Player", Icon = "user" }),
+    Shop = Window:AddTab({ Title = "Shop", Icon = "shopping-cart" }),
+    Stat = Window:AddTab({ Title = "Server & Status", Icon = "server" }),
+    Admin = Window:AddTab({ Title = "Admin & Fake", Icon = "shield-alert" })
 }
 
--- ================== TAB: REPORT ==================
-local WebSec = Tabs.Webhook:AddSection("Send Message")
-local selectedType = nil; local userMessage = ""
-WebSec:AddDropdown("ReportType", { Title = "Select Type", Values = {"Report", "Ideas"}, Callback = function(v) selectedType = v end })
-WebSec:AddInput("ReportMsg", { Title = "Input Message", Callback = function(v) userMessage = v end })
-WebSec:AddButton({ Title = "Send To Developer", Callback = function() print("Send: " .. tostring(selectedType) .. " - " .. tostring(userMessage)) end })
+-- ==========================================
+-- TAB: MAIN FARMING
+-- ==========================================
+Tabs.Farming:AddSection("Auto Farm Level")
+Tabs.Farming:AddDropdown("Method", { Title = "Select Method", Values = {"Level Farm", "Farm Bones", "Farm Katakuri", "Aura Farm"}, Default = "Level Farm", Callback = function(v) _G.MethodSelect = v end })
+Tabs.Farming:AddToggle("StartF", { Title = "Start Auto Farm", Default = false, Callback = function(v) _G.StartFarm = v end })
+Tabs.Farming:AddToggle("AccQuest", { Title = "Auto Accept Quest", Default = false, Callback = function(v) _G.AcceptQuestC = v end })
 
--- ================== TAB: SHOP ==================
-local ShopSec1 = Tabs.Shop:AddSection("Misc Shop")
-ShopSec1:AddButton({ Title = "Redeem All Codes", Callback = function()
-    local codes = {"LIGHTNINGABUSE", "1LOSTADMIN", "ADMINFIGHT", "NOMOREHACK", "BANEXPLOIT", "krazydares"}
-    for _, v in pairs(codes) do game:GetService("ReplicatedStorage").Remotes.Redeem:InvokeServer(v) end
-end})
-ShopSec1:AddButton({ Title = "Teleport Old World", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain") end})
-ShopSec1:AddButton({ Title = "Teleport New World", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa") end})
-ShopSec1:AddButton({ Title = "Teleport Third Sea", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou") end})
-ShopSec1:AddButton({ Title = "Reroll Race", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "1") end})
-ShopSec1:AddButton({ Title = "Reset Stats", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward","Refund","1") end})
+Tabs.Farming:AddSection("Settings Farm")
+Tabs.Farming:AddDropdown("Weapon", { Title = "Select Weapon", Values = {"Melee","Sword","Blox Fruit"}, Default = "Melee", Callback = function(v) _G.ChooseWP = v end })
+Tabs.Farming:AddToggle("BringMob", { Title = "Bring Mobs", Default = true, Callback = function(v) _B = v end })
+Tabs.Farming:AddToggle("AutoBuso", { Title = "Auto Haki Buso", Default = true, Callback = function(v) getgenv().AutoHakiBuso = v end })
 
-local ShopSec2 = Tabs.Shop:AddSection("Fighting Style")
+-- ==========================================
+-- TAB: STACK FARMING
+-- ==========================================
+Tabs.Stack:AddSection("Auto World & Boss")
+Tabs.Stack:AddToggle("AutoW2", { Title = "Auto New World", Default = false, Callback = function(v) _G.TravelDres = v end })
+Tabs.Stack:AddToggle("AutoW3", { Title = "Auto Third World", Default = false, Callback = function(v) _G.AutoZou = v end })
+Tabs.Stack:AddToggle("AutoFac", { Title = "Auto Factory", Default = false, Callback = function(v) _G.AutoFactory = v end })
+Tabs.Stack:AddToggle("AutoIndra", { Title = "Auto Rip Indra", Default = false, Callback = function(v) _G.AutoRipIngay = v end })
+Tabs.Stack:AddToggle("AutoDough", { Title = "Auto Dough King", Default = false, Callback = function(v) _G.AutoMiror = v end })
+Tabs.Stack:AddToggle("AutoSoul", { Title = "Auto Soul Reaper", Default = false, Callback = function(v) _G.AutoHytHallow = v end })
+
+-- ==========================================
+-- TAB: OTHER FARM
+-- ==========================================
+Tabs.Other:AddSection("Fishing")
+Tabs.Other:AddDropdown("FishRod", { Title = "Select Rod", Values = {"Fishing Rod", "Gold Rod", "Shark Rod"}, Callback = function(v) SelectedRod = v end })
+Tabs.Other:AddToggle("AutoFish", { Title = "Auto Fishing", Default = false, Callback = function(v) AutoFishing = v end })
+
+Tabs.Other:AddSection("Material & Dragon")
+Tabs.Other:AddToggle("FarmMat", { Title = "Auto Material", Default = false, Callback = function(v) _G.AutoMaterial = v end })
+Tabs.Other:AddToggle("AutoDragon", { Title = "Auto Dragon Hunter", Default = false, Callback = function(v) _G.FarmBlazeEM = v end })
+
+-- ==========================================
+-- TAB: SKILLS
+-- ==========================================
+Tabs.Skills:AddSection("Equip Skills")
+Tabs.Skills:AddDropdown("MeleeS", { Title = "Melee Skills", Values = {"Z", "X", "C"}, Multi = true, Callback = function(v) _G.MeleeSkills = v end })
+Tabs.Skills:AddDropdown("SwordS", { Title = "Sword Skills", Values = {"Z", "X"}, Multi = true, Callback = function(v) _G.SwordSkills = v end })
+Tabs.Skills:AddDropdown("FruitS", { Title = "Fruit Skills", Values = {"Z", "X", "C", "V", "F"}, Multi = true, Callback = function(v) _G.BfSkills = v end })
+
+-- ==========================================
+-- TAB: LOCAL PLAYER
+-- ==========================================
+Tabs.Local:AddSection("Character Utilities")
+Tabs.Local:AddButton({ Title = "Open Devil Fruit Shop", Callback = function() local rs = game:GetService("ReplicatedStorage") require(rs.DialogueController):Start(require(rs.DialoguesList)["FruitShop"]) end })
+Tabs.Local:AddButton({ Title = "Join Pirates", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Pirates") end })
+Tabs.Local:AddButton({ Title = "Join Marines", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines") end })
+Tabs.Local:AddToggle("RemoveDmg", { Title = "Remove Damage Text", Default = true, Callback = function(v) if game:GetService("ReplicatedStorage").Assets.GUI:FindFirstChild("DamageCounter") then game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = not v end end })
+
+-- ==========================================
+-- TAB: SHOP
+-- ==========================================
+Tabs.Shop:AddSection("Fighting Styles")
 local styles = {"BuyBlackLeg", "BuyFishmanKarate", "BuyElectro", "BuySuperhuman", "BuyDeathStep", "BuySharkmanKarate", "BuyElectricClaw", "BuyDragonTalon", "BuyGodhuman", "BuySanguineArt"}
 for _, s in pairs(styles) do
-    ShopSec2:AddButton({ Title = s:gsub("Buy", "Buy "), Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(s) end })
+    Tabs.Shop:AddButton({ Title = s:gsub("Buy", "Buy "), Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(s) end })
 end
 
--- ================== TAB: STATUS & SERVER ==================
-local SrvSec = Tabs.StatSer:AddSection("Server Status")
-local TimeLabel = SrvSec:AddLabel("Time Zone: Loading...")
-local MirageLabel = SrvSec:AddLabel("Mirage Island: ❌")
-local KitsuneLabel = SrvSec:AddLabel("Kitsune Island: ❌")
-local FMLabel = SrvSec:AddLabel("Full Moon: ❌")
+-- ==========================================
+-- TAB: STATUS & SERVER
+-- ==========================================
+Tabs.Stat:AddSection("Live Status")
+local StatusPara = Tabs.Stat:AddParagraph({ Title = "Server Info", Content = "Loading..." })
 
 task.spawn(function()
-    while task.wait(1) do pcall(function()
-        TimeLabel:SetText("Time Zone: " .. os.date("%X"))
-        MirageLabel:SetText("Mirage Island: " .. (game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") and "✅ Found" or "❌ Not Found"))
-        KitsuneLabel:SetText("Kitsune Island: " .. (game:GetService("Workspace").Map:FindFirstChild("KitsuneIsland") and "✅ Found" or "❌ Not Found"))
-    end) end
+    while task.wait(2) do 
+        pcall(function()
+            local m = game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island")
+            local k = game:GetService("Workspace").Map:FindFirstChild("KitsuneIsland")
+            StatusPara:SetDesc("Time: " .. os.date("%X") .. "\nMirage Island: " .. (m and "✅ Found" or "❌ Not Found") .. "\nKitsune Island: " .. (k and "✅ Found" or "❌ Not Found"))
+        end)
+    end
 end)
 
-local HopSec = Tabs.StatSer:AddSection("Server Management")
-HopSec:AddInput("JobID", { Title = "Input JobID", Callback = function(v) getgenv().Job = v end })
-HopSec:AddButton({ Title = "Join Server", Callback = function() if getgenv().Job then game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, getgenv().Job) end end })
-HopSec:AddButton({ Title = "Rejoin", Callback = function() game:GetService("TeleportService"):Teleport(game.PlaceId) end })
-HopSec:AddButton({ Title = "Hop Server", Callback = function() print("Hopping server...") end })
+Tabs.Stat:AddSection("Server Manager")
+Tabs.Stat:AddInput("JobID", { Title = "Input JobID", Callback = function(v) getgenv().Job = v end })
+Tabs.Stat:AddButton({ Title = "Join Server", Callback = function() if getgenv().Job then game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, getgenv().Job) end end })
+Tabs.Stat:AddButton({ Title = "Rejoin", Callback = function() game:GetService("TeleportService"):Teleport(game.PlaceId) end })
 
--- ================== TAB: LOCAL PLAYER ==================
-local LocSec1 = Tabs.LocalPlayer:AddSection("Character")
-LocSec1:AddButton({ Title = "Open Devil Fruit Shop", Callback = function() local rs = game:GetService("ReplicatedStorage") local dlg = require(rs.DialogueController) dlg:Start(require(rs.DialoguesList)["FruitShop"]) end })
-LocSec1:AddButton({ Title = "Join Pirates", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Pirates") end })
-LocSec1:AddButton({ Title = "Join Marines", Callback = function() game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines") end })
-LocSec1:AddToggle("RemoveDmg", { Title = "Remove Damage Text", Default = true, Callback = function(v) if game:GetService("ReplicatedStorage").Assets.GUI:FindFirstChild("DamageCounter") then game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = not v end end })
+-- ==========================================
+-- TAB: ADMIN & FAKE
+-- ==========================================
+Tabs.Admin:AddSection("Troll & Special Functions")
+Tabs.Admin:AddToggle("AutoStore", { Title = "Auto Store Fruit", Default = false, Callback = function(v) _G.AutoStoreFruit = v end })
 
-local LocSec2 = Tabs.LocalPlayer:AddSection("Auto Stats")
-LocSec2:AddDropdown("StatSelect", { Title = "Select Stats", Values = {"Melee", "Sword", "Gun", "Devil Fruit", "Defense"}, Callback = function(v) _G.SelectedStat = v end })
-LocSec2:AddSlider("StatPoint", { Title = "Point Stats", Min = 1, Max = 100, Default = 1, Callback = function(v) _G.pSats = v end })
-LocSec2:AddToggle("AutoStat", { Title = "Auto Stats", Default = false, Callback = function(v) _G.Auto_Stats = v end })
-
--- ================== TAB: SETTING FARM ==================
-local SetSec = Tabs.Settings:AddSection("General Settings")
-SetSec:AddDropdown("Weapon", { Title = "Select Weapon", Values = {"Melee","Sword","Blox Fruit"}, Default = "Melee", Callback = function(v) _G.ChooseWP = v end })
-SetSec:AddToggle("BringMob", { Title = "Bring Mobs", Default = true, Callback = function(v) _B = v end })
-SetSec:AddToggle("AutoBuso", { Title = "Auto Haki Buso", Default = true, Callback = function(v) getgenv().AutoHakiBuso = v end })
-SetSec:AddToggle("AutoKen", { Title = "Auto Observation", Default = false, Callback = function(v) getgenv().Observation = v end })
-
--- ================== TAB: SELECT SKILL ==================
-local SklSec = Tabs.Skills:AddSection("Equip Skills")
-SklSec:AddDropdown("MeleeS", { Title = "Melee Skills", Values = {"Z", "X", "C"}, Multi = true, Callback = function(v) _G.MeleeSkills = v end })
-SklSec:AddDropdown("SwordS", { Title = "Sword Skills", Values = {"Z", "X"}, Multi = true, Callback = function(v) _G.SwordSkills = v end })
-SklSec:AddDropdown("FruitS", { Title = "Fruit Skills", Values = {"Z", "X", "C", "V", "F"}, Multi = true, Callback = function(v) _G.BfSkills = v end })
-
--- ================== TAB: MAIN FARMING ==================
-local FarmSec1 = Tabs.Farming:AddSection("Level Farming")
-FarmSec1:AddDropdown("Method", { Title = "Select Method", Values = {"Level Farm", "Farm Bones", "Farm Katakuri", "Aura Farm"}, Default = "Level Farm", Callback = function(v) _G.MethodSelect = v end })
-FarmSec1:AddToggle("StartF", { Title = "Start Auto Farm", Default = false, Callback = function(v) _G.StartFarm = v end })
-FarmSec1:AddToggle("AccQuest", { Title = "Auto Accept Quest", Default = false, Callback = function(v) _G.AcceptQuestC = v end })
-
-local FarmSec2 = Tabs.Farming:AddSection("Mastery & Materials")
-FarmSec2:AddDropdown("MasType", { Title = "Mastery Weapon", Values = {"Blox Fruit", "Gun"}, Callback = function(v) _G.MasteryTypeSelect = v end })
-FarmSec2:AddToggle("FarmMas", { Title = "Start Mastery", Default = false, Callback = function(v) _G.MasteryFarmStart = v end })
-FarmSec2:AddDropdown("MatType", { Title = "Select Material", Values = {"Scrap Metal", "Magma Ore", "Vampire Fang", "Conjured Cocoa", "Dragon Scale"}, Callback = function(v) _G.SelectMaterial = v end })
-FarmSec2:AddToggle("FarmMat", { Title = "Farm Material", Default = false, Callback = function(v) _G.AutoMaterial = v end })
-
--- ================== TAB: STACK FARMING ==================
-local StackSec1 = Tabs.Stack:AddSection("World & Fruit")
-StackSec1:AddToggle("AutoW2", { Title = "Auto New World", Default = false, Callback = function(v) _G.TravelDres = v end })
-StackSec1:AddToggle("AutoW3", { Title = "Auto Third World", Default = false, Callback = function(v) _G.AutoZou = v end })
-StackSec1:AddToggle("TPFruit", { Title = "Teleport to Fruit", Default = false, Callback = function(v) _G.TwFruits = v end })
-
-local StackSec2 = Tabs.Stack:AddSection("Bosses & Events")
-StackSec2:AddToggle("AutoFac", { Title = "Auto Factory", Default = false, Callback = function(v) _G.AutoFactory = v end })
-StackSec2:AddToggle("AutoIndra", { Title = "Auto Rip Indra", Default = false, Callback = function(v) _G.AutoRipIngay = v end })
-StackSec2:AddToggle("AutoDough", { Title = "Auto Dough King", Default = false, Callback = function(v) _G.AutoMiror = v end })
-StackSec2:AddToggle("AutoSoul", { Title = "Auto Soul Reaper", Default = false, Callback = function(v) _G.AutoHytHallow = v end })
-
--- ================== TAB: OTHER FARMING ==================
-local OthSec1 = Tabs.Other:AddSection("Fishing")
-OthSec1:AddDropdown("FishRod", { Title = "Select Rod", Values = {"Fishing Rod", "Gold Rod", "Shark Rod"}, Callback = function(v) SelectedRod = v end })
-OthSec1:AddToggle("AutoFish", { Title = "Auto Fishing", Default = false, Callback = function(v) AutoFishing = v end })
-OthSec1:AddToggle("FishQuest", { Title = "Auto Fishing Quest", Default = false, Callback = function(v) AutoFishingQuest = v end })
-
-local OthSec2 = Tabs.Other:AddSection("Dragon")
-OthSec2:AddToggle("AutoDragon", { Title = "Auto Dragon Hunter", Default = false, Callback = function(v) _G.FarmBlazeEM = v end })
-
--- ================== TAB: ADMIN & FAKE (TÍNH NĂNG ĐẶC BIỆT) ==================
-local AdSec = Tabs.AdminFake:AddSection("Troll & Utilities")
-AdSec:AddToggle("AutoStore", { Title = "Auto Store Fruit", Default = false, Callback = function(v) _G.AutoStoreFruit = v end })
-
-AdSec:AddButton({ Title = "Fake Admin (!ad)", Callback = function()
+Tabs.Admin:AddButton({ Title = "Fake Admin (!ad)", Callback = function()
     game.Players.LocalPlayer.Chatted:Connect(function(msg)
         if msg == "!ad" then
             game.StarterGui:SetCore("SendNotification", {Title = "System", Text = "Admin Mode Activated", Duration = 5})
@@ -151,7 +129,7 @@ AdSec:AddButton({ Title = "Fake Admin (!ad)", Callback = function()
     end)
 end})
 
-AdSec:AddButton({ Title = "Fake Kitsune Fruit", Callback = function()
+Tabs.Admin:AddButton({ Title = "Get Fake Kitsune Fruit", Callback = function()
     local f = Instance.new("Tool"); f.Name = "Kitsune-Kitsune"
     local h = Instance.new("Part", f); h.Name = "Handle"; h.Size = Vector3.new(1, 1, 1)
     f.Parent = game.Players.LocalPlayer.Backpack
@@ -162,7 +140,7 @@ local UIS = game:GetService("UserInputService")
 UIS.InputBegan:Connect(function(i, p)
     if not p and i.KeyCode == Enum.KeyCode.Space then
         local char = game.Players.LocalPlayer.Character
-        if char and char:FindFirstChild("Humanoid"):GetState() == Enum.HumanoidStateType.Freefall then
+        if char and char:FindFirstChild("Humanoid") and char.Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
             for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end end
         end
     end
@@ -176,7 +154,7 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- LOGIC AUTO STORE FRUIT
+-- LOGIC AUTO STORE
 task.spawn(function()
     while task.wait(1) do
         if _G.AutoStoreFruit then
@@ -193,4 +171,3 @@ end)
 
 Window:SelectTab(1)
 Fluent:Notify({ Title = "QUANG MOD", Content = "Loaded Full Features UI!", Duration = 5 })
-
