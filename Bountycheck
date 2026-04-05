@@ -1,0 +1,117 @@
+-- [[ CONFIGURATION ]]
+local Settings = {
+    Webhook_URL = "https://discord.com/api/webhooks/1477601625945407714/cm27KWxnN1bIk7KQpccEmSVRghh9GvWn-lbSftl_TtX7SoEd9CIKsTCgNZug7PnbC2BX", -- Thay link của bạn vào đây
+    Check_Interval = 1, 
+    Admin_Name = "QUANG MOD"
+}
+
+-- Thêm "?wait=true" vào link webhook để lấy được ID tin nhắn (quan trọng để Edit)
+local baseWebhook = Settings.Webhook_URL .. "?wait=true"
+local lastMsgId = nil
+
+-- [[ UI SETUP ]]
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local InfoLabel = Instance.new("TextLabel")
+local UICorner = Instance.new("UICorner")
+
+ScreenGui.Name = "QuangModUI"
+ScreenGui.Parent = game.CoreGui
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+-- Chỉnh Position sang góc phải (1 là sát lề phải, trừ đi độ rộng của UI)
+MainFrame.Position = UDim2.new(1, -210, 0.1, 0) 
+MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Font = Enum.Font.GothamBold
+Title.Text = Settings.Admin_Name
+Title.TextColor3 = Color3.fromRGB(255, 200, 0) -- Màu vàng admin
+Title.TextSize = 18
+
+InfoLabel.Parent = MainFrame
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Position = UDim2.new(0, 0, 0, 35)
+InfoLabel.Size = UDim2.new(1, 0, 0, 60)
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.Text = "Đang khởi tạo..."
+InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+InfoLabel.TextSize = 14
+
+-- [[ WEBHOOK FUNCTION ]]
+local HttpService = game:GetService("HttpService")
+local Player = game.Players.LocalPlayer
+
+local function updateWebhook(teamName, bountyValue)
+    local data = {
+        ["embeds"] = {{
+            ["title"] = "🔴 TRẠNG THÁI TRỰC TUYẾN - " .. Settings.Admin_Name,
+            ["fields"] = {
+                {["name"] = "👤 Nhân vật", ["value"] = Player.Name, ["inline"] = true},
+                {["name"] = "🚩 Phe", ["value"] = teamName, ["inline"] = true},
+                {["name"] = "💰 Bounty/Honor", ["value"] = bountyValue, ["inline"] = false}
+            },
+            ["color"] = teamName == "Pirates" and 15105570 or 3447003,
+            ["footer"] = {["text"] = "Cập nhật lần cuối: " .. os.date("%H:%M:%S")},
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+
+    local jsonData = HttpService:JSONEncode(data)
+    local request = http_request or request or HttpPost or syn.request
+    
+    if not lastMsgId then
+        -- Lần đầu tiên: Gửi tin nhắn mới
+        local response = request({
+            Url = baseWebhook,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = jsonData
+        })
+        if response.Success then
+            local resData = HttpService:JSONDecode(response.Body)
+            lastMsgId = resData.id -- Lưu ID tin nhắn lại
+        end
+    else
+        -- Các lần sau: Sửa (PATCH) tin nhắn cũ
+        request({
+            Url = Settings.Webhook_URL .. "/messages/" .. lastMsgId,
+            Method = "PATCH",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = jsonData
+        })
+    end
+end
+
+-- [[ MAIN LOOP ]]
+spawn(function()
+    while true do
+        pcall(function()
+            local team = Player.Team
+            local bounty = Player.leaderstats["Bounty/Honor"].Value
+            local teamName = (team and team.Name) or "Đang chọn phe..."
+            
+            local function formatNumber(n)
+                return tostring(n):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+            end
+
+            -- Update UI trong game (Góc phải)
+            InfoLabel.Text = string.format("Phe: %s\nBounty: %s\nWebhook: Đang chạy", 
+                teamName, formatNumber(bounty))
+            
+            -- Gửi/Sửa Webhook Discord
+            updateWebhook(teamName, formatNumber(bounty))
+        end)
+        task.wait(Settings.Check_Interval)
+    end
+end)
